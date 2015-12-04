@@ -209,6 +209,16 @@ class DartCompletionManager extends CompletionManager {
       for (CompletionSuggestion suggestion in newSuggestions) {
         request.addSuggestion(suggestion);
       }
+
+      // if the list of completions contains named arguments completions, then
+      // only named argument completions are relevant, so filter out other
+      // completions
+      if (request.suggestions
+          .any((c) => c.kind == CompletionSuggestionKind.NAMED_ARGUMENT)) {
+        request.suggestions.removeWhere(
+            (c) => c.kind != CompletionSuggestionKind.NAMED_ARGUMENT);
+      }
+      
       performance.logElapseTime(contributorTag);
     }
     performance.logElapseTime('computeSuggestions');
@@ -409,7 +419,7 @@ class DartCompletionRequest extends CompletionRequestImpl {
   /**
    * The list of suggestions to be sent to the client.
    */
-  Iterable<CompletionSuggestion> get suggestions => _suggestions;
+  List<CompletionSuggestion> get suggestions => _suggestions;
 
   /**
    * Add the given suggestion to the list that is returned to the client as long
